@@ -28,4 +28,4 @@ case class EdgeData(tau: Double, distance: Long) {
     EdgeData(newTau, distance)
   }
 }
-  
+

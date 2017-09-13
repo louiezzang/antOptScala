@@ -15,25 +15,31 @@ class AntOpt(val nodes: Map[Int, Point], val numAnts: Int = 50, generations: Int
     nodes(connection.startNodeId).distance(nodes(connection.targetNodeId)).toInt))).toMap[Edge, EdgeData]
 
   val bestTour = Tour(List(), nodes)
-  
-  def adjustAllEdges(edges: Map[Edge, EdgeData], changes:Map[Edge, EdgeData]): Map[Edge, EdgeData] = {
+
+  def adjustAllEdges(edges: Map[Edge, EdgeData], changes: Map[Edge, EdgeData]): Map[Edge, EdgeData] = {
     edges.map(edge => {
-      if (changes(edge._1) != None) 
+      if (changes.contains(edge._1))
         (edge._1, changes(edge._1))
       else
         edge
     }).toMap[Edge, EdgeData]
   }
 
-//  def adjustPheromones(tours: List[Tour], changes:Map[Edge, EdgeData], edges: Map[Edge, EdgeData]): Map[Edge, EdgeData] = {
-//    tours.size match {
-//      case 0 => adjustAllEdges(edges, changes)
-//      case _ => {
-//        tours.head.route.map()
-//        adjustPheromones(tours.tail, changes, edges)
-//      }
-//    }
-//  }
+  def adjustPheromones(tours: List[Tour], changes: Map[Edge, EdgeData], edges: Map[Edge, EdgeData]): Map[Edge, EdgeData] = {
+    tours.size match {
+      case 0 => adjustAllEdges(edges, changes)
+      case _ => {
+        val newChanges = changes.map(change => {
+          if (tours.head.route.contains(change._1)) {
+            (change._1, change._2.adjustPheromones(tours.head.length))
+          } else {
+            change
+          }
+        }).toMap
+        adjustPheromones(tours.tail, newChanges, edges)
+      }
+    }
+  }
 
   def runTour(generation: Int, edges: Map[Edge, EdgeData], bestTour: Tour): Tour = {
     println("Generation" + generation)
@@ -43,13 +49,13 @@ class AntOpt(val nodes: Map[Int, Point], val numAnts: Int = 50, generations: Int
         val tours = (for (i <- (1 to numAnts)) yield Ant(i, nodes).findTour(edges)).toList
 
         val shortestTour = tours(tours.map(tour => tour.length).zipWithIndex.min._2)
-     
+
         if (shortestTour.length < bestTour.length) {
           println("new shortest Tour in generation " + generation + ": " + shortestTour.length + " : " + shortestTour.route)
         }
 
-        //val adjusted = adjustPheromones(tours.toList, edges, Map[Edge, EdgeData]())
-        val evaporated = edges.map(edge => (edge._1, edge._2.evaporatePheromones)).toMap[Edge, EdgeData]
+        val adjusted = adjustPheromones(tours.toList, Map[Edge, EdgeData](), edges)
+        val evaporated = adjusted.map(edge => (edge._1, edge._2.evaporatePheromones)).toMap[Edge, EdgeData]
 
         if (shortestTour.length < bestTour.length)
           runTour(generation - 1, evaporated: Map[Edge, EdgeData], shortestTour: Tour)
@@ -77,7 +83,7 @@ object AntOpt extends App {
   }
 
   println("Start");
-  val nodes = getNodesFromFile("tsmdata/test3.tsp.json")
+  val nodes = getNodesFromFile("tsmdata/a280.tsp.json")
   val a = new AntOpt(nodes).findBestTour()
   println("End")
 }

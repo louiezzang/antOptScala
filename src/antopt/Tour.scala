@@ -13,4 +13,4 @@ case class Tour(route: List[Edge], nodes: Map[Int, Point]) {
       case _         => List[Int]()
     }
 }
-  
+
