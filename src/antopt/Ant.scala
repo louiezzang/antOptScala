@@ -8,38 +8,31 @@ case class Ant(id: Int, nodes: Map[Int, Point]) {
     "Ant " + id
   }
 
-  def findTour(route: List[Int], edges: Map[Edge, EdgeData]): Tour = {
-    val possibleRoutes = for (i <- (1 to nodes.size) if (!route.contains(i))) yield Edge(route.head, i)
-
-    possibleRoutes.size match {
-      case 0 => {
-        val routeLength =
-          route.sliding(2, 1)
-            .map(segment => nodes(segment.head).distance(nodes(segment.last)))
-            .reduceLeft(_ + _)
-        Tour(route.last :: route, routeLength + nodes(route.head).distance(nodes(route.last)))
-      }
-      case _ => {
-        val nextNode = findNextNode(possibleRoutes.toList, edges);
-        findTour(nextNode :: route, edges)
-      }
+  def findTour(tour: Tour, possibleNextEdges: List[Edge], edges: Map[Edge, EdgeData]): Tour = {
+    if (possibleNextEdges.isEmpty) {
+      Tour(Edge(tour.route.head.targetNodeId, 1) :: tour.route, tour.nodes)
+    } else {
+      val nextEdge = findNextEdge(possibleNextEdges, edges);
+      val newTour = Tour(nextEdge :: tour.route, nodes)
+      val newPossibleNextEdges = (for (i <- (1 to nodes.size) if (!newTour.visitedNodes.contains(i))) yield Edge(nextEdge.targetNodeId, i)).toList
+      findTour(newTour, newPossibleNextEdges, edges)
     }
   }
-  
+
   def findTour(edges: Map[Edge, EdgeData]): Tour = {
-    val possibleStarts = for (i <- (1 to nodes.size)) yield Edge(1, i)
-    findTour(possibleStarts, edges)
+    val possibleStartEdges = (for (i <- (1 to nodes.size) if (i != 1)) yield Edge(1, i)).toList
+    findTour(Tour(List[Edge](), nodes), possibleStartEdges, edges)
   }
 
-  def findNextNode(possibleRoutes: List[Edge], edges: Map[Edge, EdgeData]) = {
-    val probabilities = possibleRoutes.map(route => edges(route).probability)
+  def findNextEdge(possibleNextEdges: List[Edge], allEdges: Map[Edge, EdgeData]) = {
+    val probabilities = possibleNextEdges.map(edge => allEdges(edge).probability)
     val probSize = probabilities.size
     val addedProbabilities = probabilities.drop(1).scanLeft(probabilities(0))(_ + _)
     val addProbSize = addedProbabilities.size
     val maxProbability = addedProbabilities.last
     val targetProbability = r.nextDouble * maxProbability
     val smallerProbabilities = addedProbabilities.filter(x => x <= targetProbability)
-    possibleRoutes(smallerProbabilities.size).targetNodeId
+    possibleNextEdges(smallerProbabilities.size)
   }
 
 }
