@@ -53,7 +53,7 @@ class AntOpt(val nodes: Map[Int, Point], val numAnts: Int = 150, generations: In
     generation match {
       case 0 => bestTour
       case _ => {
-        val tours = (for (i <- (1 to numAnts)) yield Ant(i).runTour(edges, nodes)).toList
+        val tours = (1 to numAnts).par.map(i => Ant(i).runTour(edges, nodes)).toList
 
         val shortestTour = tours(tours.map(tour => tour.length).zipWithIndex.min._2)
 
