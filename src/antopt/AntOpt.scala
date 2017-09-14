@@ -74,7 +74,7 @@ class AntOpt(val nodes: Map[Int, Point], val numAnts: Int = 150, generations: In
 
   def findBestTour() = {
     val bestTourFound = runToursWithMultipleAnts(generations, edges, bestTour);
-    println("bestTour found : " + bestTourFound.length + " : " + bestTourFound.route)
+    println("bestTour found : " + bestTourFound.length + " : " + bestTourFound.route.reverse)
   }
 
 }
