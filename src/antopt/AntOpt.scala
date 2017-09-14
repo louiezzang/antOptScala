@@ -4,7 +4,7 @@ import scala.math._
 import jawn.ast._
 import jawn.ChannelParser
 
-class AntOpt(val nodes: Map[Int, Point], val numAnts: Int = 50, generations: Int = 250) {
+class AntOpt(val nodes: Map[Int, Point], val numAnts: Int = 150, generations: Int = 200) {
 
   val r = scala.util.Random
 
@@ -85,8 +85,7 @@ object AntOpt extends App {
     val json = JParser.parseFromPath(fileName).get
     val coordSection = json.get("NODE_COORD_SECTION")
     val dim = json.get("DIMENSION").asString.toInt
-    val nodes = for (x <- (1 to dim)) yield (x, Point(coordSection.get(x.toString).get("x").asString.toInt, coordSection.get(x.toString).get("y").asString.toInt))
-    nodes.toMap
+    (for (i <- (0 to dim - 1)) yield (i + 1, Point(coordSection.get(i).get("x").asString.toInt, coordSection.get(i).get("y").asString.toInt))).toMap
   }
 
   if (args.length == 0) {
