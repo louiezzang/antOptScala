@@ -11,6 +11,7 @@ case class EdgeData(tau: Double, distance: Long) {
 
   val weightedDistance = pow(distance, Beta)
   val weightedTau = pow(tau, Alpha)
+  
   val probability =
     weightedDistance match {
       case 0 => 0
