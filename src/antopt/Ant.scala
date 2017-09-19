@@ -22,20 +22,18 @@ case class Ant(id: Int) {
   }
 
   @tailrec
-  private def runTour(tour: Tour, possibleNextEdges: List[Edge], edges: Map[Edge, EdgeData]): Tour = {
-    if (possibleNextEdges.isEmpty) {
+  private def runTour(tour: Tour, edges: Map[Edge, EdgeData]): Tour = {
+    if (tour.possibleNextEdges.isEmpty) {
       Tour(Edge(tour.route.head.targetNodeId, 1) :: tour.route, tour.nodes)
     } else {
-      val nextEdge = chooseNextEdge(possibleNextEdges, edges);
+      val nextEdge = chooseNextEdge(tour.possibleNextEdges, edges);
       val newTour = Tour(nextEdge :: tour.route, tour.nodes)
-      val newPossibleNextEdges = (for (i <- (1 to tour.nodes.size) if (!newTour.visitedNodes.contains(i))) yield Edge(nextEdge.targetNodeId, i)).toList
-      runTour(newTour, newPossibleNextEdges, edges)
+      runTour(newTour, edges)
     }
   }
 
   def runTour(edges: Map[Edge, EdgeData], nodes: Map[Int, Point]): Tour = {
-    val possibleStartEdges = (for (i <- (1 to nodes.size) if (i != 1)) yield Edge(1, i)).toList
-    runTour(Tour(List[Edge](), nodes), possibleStartEdges, edges)
+    runTour(Tour(List[Edge](), nodes), edges)
   }
 
 }
