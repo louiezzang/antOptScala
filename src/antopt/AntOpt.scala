@@ -3,6 +3,7 @@ package antopt
 import scala.math._
 import jawn.ast._
 import jawn.ChannelParser
+import scala.annotation.tailrec
 
 class AntOpt(val nodes: Map[Int, Point], val numAnts: Int = 150, generations: Int = 200) {
 
@@ -16,7 +17,7 @@ class AntOpt(val nodes: Map[Int, Point], val numAnts: Int = 150, generations: In
 
   val bestTour = Tour(List(), nodes)
 
-  def createAdjustedEdges(edges: Map[Edge, EdgeData], changes: Map[Edge, EdgeData]): Map[Edge, EdgeData] = {
+  private def createAdjustedEdges(edges: Map[Edge, EdgeData], changes: Map[Edge, EdgeData]): Map[Edge, EdgeData] = {
     edges.map(edge => {
       if (changes.contains(edge._1))
         (edge._1, changes(edge._1))
@@ -25,7 +26,8 @@ class AntOpt(val nodes: Map[Int, Point], val numAnts: Int = 150, generations: In
     }).toMap[Edge, EdgeData]
   }
 
-  def adjustPheromones(tours: List[Tour], changes: Map[Edge, EdgeData], edges: Map[Edge, EdgeData]): Map[Edge, EdgeData] = {
+  @tailrec
+  private def adjustPheromones(tours: List[Tour], changes: Map[Edge, EdgeData], edges: Map[Edge, EdgeData]): Map[Edge, EdgeData] = {
     tours.size match {
       case 0 => createAdjustedEdges(edges, changes)
       case _ => {
@@ -44,11 +46,12 @@ class AntOpt(val nodes: Map[Int, Point], val numAnts: Int = 150, generations: In
     }
   }
 
-  def adjustPheromones(tours: List[Tour], edges: Map[Edge, EdgeData]): Map[Edge, EdgeData] = {
+  private def adjustPheromones(tours: List[Tour], edges: Map[Edge, EdgeData]): Map[Edge, EdgeData] = {
     adjustPheromones(tours.tail, Map[Edge, EdgeData](), edges)
   }
 
-  def runToursWithMultipleAnts(generation: Int, edges: Map[Edge, EdgeData], bestTour: Tour): Tour = {
+  @tailrec
+  private def runToursWithMultipleAnts(generation: Int, edges: Map[Edge, EdgeData], bestTour: Tour): Tour = {
     println("Generation" + generation)
     generation match {
       case 0 => bestTour

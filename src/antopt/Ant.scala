@@ -1,5 +1,7 @@
 package antopt
 
+import scala.annotation.tailrec
+
 case class Ant(id: Int) {
 
   val r = scala.util.Random
@@ -8,7 +10,7 @@ case class Ant(id: Int) {
     "Ant:" + id
   }
 
-  def chooseNextEdge(possibleNextEdges: List[Edge], allEdges: Map[Edge, EdgeData]) = {
+  private def chooseNextEdge(possibleNextEdges: List[Edge], allEdges: Map[Edge, EdgeData]) = {
     val probabilities = possibleNextEdges.map(edge => allEdges(edge).probability)
     val probSize = probabilities.size
     val addedProbabilities = probabilities.drop(1).scanLeft(probabilities(0))(_ + _)
@@ -19,7 +21,8 @@ case class Ant(id: Int) {
     possibleNextEdges(smallerProbabilities.size)
   }
 
-  def runTour(tour: Tour, possibleNextEdges: List[Edge], edges: Map[Edge, EdgeData]): Tour = {
+  @tailrec
+  private def runTour(tour: Tour, possibleNextEdges: List[Edge], edges: Map[Edge, EdgeData]): Tour = {
     if (possibleNextEdges.isEmpty) {
       Tour(Edge(tour.route.head.targetNodeId, 1) :: tour.route, tour.nodes)
     } else {
