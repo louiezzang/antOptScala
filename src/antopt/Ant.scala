@@ -11,7 +11,7 @@ case class Ant(id: Int) {
   }
 
   private def chooseNextEdge(possibleNextEdges: List[Edge], allEdges: Map[Edge, EdgeData]) = {
-    val probabilities = possibleNextEdges.map(edge => allEdges(edge).probability)
+    val probabilities = possibleNextEdges.map(allEdges(_).probability)
     val probSize = probabilities.size
     val addedProbabilities = probabilities.drop(1).scanLeft(probabilities(0))(_ + _)
     val addProbSize = addedProbabilities.size

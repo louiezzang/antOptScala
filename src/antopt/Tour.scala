@@ -9,7 +9,7 @@ case class Tour(route: List[Edge], nodes: Map[Int, Point]) {
 
   def visitedNodes =
     route match {
-      case head :: _ => head.targetNodeId :: route.map(edge => edge.startNodeId)
+      case head :: _ => head.targetNodeId :: route.map(_.startNodeId)
       case _         => List[Int]()
     }
 

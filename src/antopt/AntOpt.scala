@@ -38,7 +38,7 @@ class AntOpt(val nodes: Map[Int, Point], val numAnts: Int = 150, generations: In
             change
           }
         }).toMap
-        val newChanges = tours.head.route.filter(segment => changes.contains(segment)).map(
+        val newChanges = tours.head.route.filter(!changes.contains(_)).map(
           segment => (segment, edges(segment).adjustPheromones(tours.head.length))).toMap
 
         adjustPheromones(tours.tail, adjustedChanges ++ newChanges, edges)
@@ -56,9 +56,9 @@ class AntOpt(val nodes: Map[Int, Point], val numAnts: Int = 150, generations: In
     generation match {
       case 0 => bestTour
       case _ => {
-        val tours = (1 to numAnts).par.map(i => Ant(i).runTour(edges, nodes)).toList
+        val tours = (1 to numAnts).par.map(Ant(_).runTour(edges, nodes)).toList
 
-        val shortestTour = tours(tours.map(tour => tour.length).zipWithIndex.min._2)
+        val shortestTour = tours(tours.map(_.length).zipWithIndex.min._2)
 
         if (shortestTour.length < bestTour.length) {
           println("new shortest Tour in generation " + generation + ": " + shortestTour.length + " : " + shortestTour.route)
