@@ -14,7 +14,6 @@ case class Ant(id: Int) {
     val probabilities = possibleNextEdges.map(allEdges(_).probability)
     val probSize = probabilities.size
     val addedProbabilities = probabilities.drop(1).scanLeft(probabilities(0))(_ + _)
-    val addProbSize = addedProbabilities.size
     val maxProbability = addedProbabilities.last
     val targetProbability = r.nextDouble * maxProbability
     val smallerProbabilities = addedProbabilities.filter(x => x <= targetProbability)
