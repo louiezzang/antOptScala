@@ -58,18 +58,14 @@ class AntOpt(val nodes: Map[Int, Point], val numAnts: Int = 150, generations: In
       case _ => {
         val tours = (1 to numAnts).par.map(Ant(_).runTour(edges, nodes)).toList
 
-        val shortestTour = tours(tours.map(_.length).zipWithIndex.min._2)
-
-        if (shortestTour.length < bestTour.length) {
-          println("new shortest Tour in generation " + generation + ": " + shortestTour.length + " : " + shortestTour.route)
-        }
-
         val adjusted = adjustPheromones(tours.toList, edges)
         val evaporated = adjusted.map(edge => (edge._1, edge._2.evaporatePheromones)).toMap[Edge, EdgeData]
 
-        if (shortestTour.length < bestTour.length)
+        val shortestTour = tours(tours.map(_.length).zipWithIndex.min._2)
+        if (shortestTour.length < bestTour.length) {
+          println("new shortest Tour in generation " + generation + ": " + shortestTour.length + " : " + shortestTour.route)
           runToursWithMultipleAnts(generation - 1, evaporated: Map[Edge, EdgeData], shortestTour: Tour)
-        else
+        } else
           runToursWithMultipleAnts(generation - 1, evaporated: Map[Edge, EdgeData], bestTour: Tour)
       }
     }
